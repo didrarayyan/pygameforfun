@@ -1,0 +1,125 @@
+import pygame, sys, random, math
+import tkinter as tk
+from tkinter import ttk
+import os
+
+# --- Tkinter Setup ---
+root = tk.Tk()
+root.title("Space Shooter Game")
+root.geometry("400x300")
+root.configure(bg='black')
+
+game_frame = ttk.Frame(root)
+game_frame.pack(expand=True, fill='both')
+
+style = ttk.Style()
+style.configure('Custom.TButton', 
+                font=('Arial', 12, 'bold'),
+                padding=10,
+                background='#333333',
+                foreground='white')
+
+def start_game():
+    root.withdraw()
+    pygame.init()
+    run_game()
+
+start_button = ttk.Button(
+    game_frame, 
+    text="Launch Space Shooter", 
+    command=start_game,
+    style='Custom.TButton'
+)
+start_button.pack(pady=20)
+
+def run_game():
+    if os.name == 'nt':
+        os.environ['SDL_VIDEODRIVER'] = 'windib'
+    
+    # --- Initialize Pygame and Set Up Screen ---
+    SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Old School Space Shooter")
+    clock = pygame.time.Clock()
+
+    # --- Colors ---
+    BLACK   = (0, 0, 0)
+    WHITE   = (255, 255, 255)
+    GRAY    = (100, 100, 100)
+    BLUE    = (50, 150, 255)
+    RED     = (255, 50, 50)
+    YELLOW  = (255, 215, 0)
+    DARKBLUE= (10, 10, 30)
+
+    # --- Game States ---
+    game_state = "start"
+    score = 0
+
+    # [Keep all original classes: Star, Player, Bullet, Enemy, Coin]
+    # [Keep all original functions: draw_text, draw_button, etc.]
+
+    # --- Initialize Game Objects ---
+    player = Player()
+    bullets = []
+    enemies = []
+    coins = []
+    enemy_spawn_timer = 0
+    coin_spawn_timer = 0
+    stars = [Star() for _ in range(50)]
+
+    # --- Main Game Loop ---
+    running = True
+    while running:
+        dt = clock.tick(60) / 1000.0
+        
+        if game_state == "start":
+            start_button, exit_button = draw_title_screen()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_button.collidepoint(event.pos):
+                        reset_game()
+                        game_state = "playing"
+                    elif exit_button.collidepoint(event.pos):
+                        running = False
+            pygame.display.flip()
+        
+        elif game_state == "playing":
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+            
+            # [Keep all original game logic]
+            # Update stars, player, bullets, enemies, coins
+            # Check collisions
+            # Draw everything
+            
+            pygame.display.flip()
+        
+        elif game_state == "game_over":
+            retry_button, title_button = draw_game_over_screen()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if retry_button.collidepoint(event.pos):
+                        reset_game()
+                        game_state = "playing"
+                    elif title_button.collidepoint(event.pos):
+                        game_state = "start"
+            pygame.display.flip()
+
+    pygame.quit()
+    root.deiconify()
+
+root.mainloop()
